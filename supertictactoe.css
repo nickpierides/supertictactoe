@@ -1,0 +1,348 @@
+body {
+    background-color: #1e1e1e;
+    font-weight: 900;
+    color: #f0f0f0;
+    font-family: Arial Black, sans-serif;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+#controls {
+    margin: 10px;
+}
+
+#restartButton {
+    font-weight: 750;
+    padding: 10px 15px;
+    margin: 10px;
+    font-size: 16px;
+    background-color: #fd6144;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.5s;
+}
+
+#restartButton:hover {
+    background-color: #d5432d;
+}
+
+#container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 20px;
+    position: relative;
+}
+
+#game {
+    display: flex;
+    flex-wrap: wrap;
+    width: 612px;
+    box-shadow: 0 0 100px rgba(0,0,0, 1);
+    border-radius: 20px;
+}
+
+#testingBoard {
+    display: flex;
+    flex-wrap: wrap;
+    width: 200px;
+    margin-left: 20px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    background-color: #2d2d2d;
+    position: sticky;
+    right: 140px;
+}
+
+.board {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    width: 200px;
+    height: 200px;
+    border: 2px solid #333;
+    margin: -1px 0 0 -1px;
+    border-radius: 10px;
+    background-color: #2e2e2e;
+    overflow: hidden;
+    transition: background-color 0.5s;
+}
+
+/* Hover effect on active boards */
+.board.active:hover {
+    box-shadow: 0 0 15px rgba(255, 99, 71, 0.8);
+    cursor: pointer;
+}
+
+.cell {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border: 1px solid #444;
+    line-height: 64px;
+    font-size: 48px;
+    font-weight: 900;
+    font-family: 'Arial Black', Gadget, sans-serif;
+    cursor: pointer;
+    margin: -1px 0 0 -1px;
+    text-align: center;
+    color: #f0f0f0;
+    transition: background-color 0.3s, transform 0.2s;
+    border-radius: 5px;
+    background-color: #3e3e3e;
+}
+
+.cell:hover {
+    background-color: #2f2f2f;
+}
+
+.cell.disabled {
+    background-color: #3e3e3e;
+    cursor: not-allowed;
+}
+
+/* Darker X's and O's inside won boards */
+.board.won .cell {
+    color: darkgray;
+}
+
+/* Dark gray background for won boards */
+.board.won {
+    background-color: #0d0d0d;
+}
+
+.board.active {
+    border-color: #ff6347;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 198px;
+    height: 198px;
+    background-color: rgba(5, 5, 5, 0.2);
+    font-size: 160px;
+    font-weight: 900;
+    font-family: 'Arial Black', Gadget, sans-serif;
+    line-height: 198px;
+    text-align: center;
+    color: #ff6347;
+    text-shadow: 0 0 10px rgba(255, 99, 71, 0.8);
+    pointer-events: none;
+    animation: smash 0.5s forwards;
+}
+
+@keyframes smash {
+    0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(15deg);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* Animation for cell clicks */
+.cell.played {
+    animation: pop 0.2s ease-out forwards;
+}
+
+@keyframes pop {
+    0% {
+        transform: scale(0.8);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Particle styles */
+.enhanced-particle {
+    position: absolute;
+    background-color: #ff6347;
+    border-radius: 25%;
+    pointer-events: none;
+    animation: enhancedParticleAnim 1.5s forwards;
+}
+
+@keyframes enhancedParticleAnim {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--dx), var(--dy)) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* Ghost symbol styles using ::after pseudo-element */
+.cell.ghost::after {
+    content: attr(data-ghost);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    line-height: 64px;
+    font-size: 48px;
+    font-weight: 900;
+    font-family: 'Arial Black', Gadget, sans-serif;
+    color: inherit;
+    opacity: 0;
+    animation: fadeIn .5s forwards;
+    text-align: center;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 0.65;
+    }
+}
+
+/* Adjusted ghost classes */
+.cell.ghost-x {
+    color: #ff6347;
+}
+
+.cell.ghost-o {
+    color: #1e90ff;
+}
+
+/* Victory Screen Styles */
+#victoryScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    display: none;
+}
+
+#victoryScreen .message {
+    background-color: #2e2e2e;
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    color: #f0f0f0;
+}
+
+#victoryScreen .message h2 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+#victoryScreen .message button {
+    padding: 10px 20px;
+    font-size: 18px;
+  font-weight : 900px;
+    background-color: #ff6347;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#victoryScreen .message button:hover {
+    background-color: #e5533d;
+}
+
+/* Testing Board Styles */
+#testingBoard .cell {
+    font-size: 32px;
+}
+
+#testingBoard .cell:hover {
+    background-color: #333;
+}
+
+/* Testing board cell colors */
+#testingBoard .cell.x {
+    color: #ff6347;
+}
+
+#testingBoard .cell.o {
+    color: #1e90ff;
+}
+
+/* Adjusted Options Popup Styles */
+.options-popup {
+    position: absolute;
+    top: 100%; /* Position below testingBoard */
+    left: 0;
+    margin-top: 10px; /* Add some space */
+    background-color: #2e2e2e;
+    padding: 10px; /* Reduced padding */
+    border: 0px solid #444;
+    border-radius: 10px;
+    z-index: 1000;
+    text-align: center;
+    width: 180px;
+    display: flex; /* Use flex layout */
+    flex-direction: column;
+    align-items: center;
+}
+
+.options-popup p {
+    font-weight: bold;
+    margin: 0 0 0 0; /* Adjust margins */
+}
+
+.options-popup .button-group {
+    display: flex;
+    justify-content: center;
+}
+
+.options-popup .button-group button {
+    margin: 0 5px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.options-popup .button-group button:first-child {
+    margin-left: 0;
+}
+
+.options-popup .button-group button:last-child {
+    margin-right: 0;
+}
+
+/* Specific button styles */
+.options-popup .x-button {
+    background-color: #ff6347;
+    color: #fdd
+}
+
+.options-popup .o-button {
+    background-color: #1e90ff;
+    color: #ccf
+}
+
+.options-popup .cancel-button {
+    background-color: #444;
+    color: #bbb
+  
+}
+
+.options-popup .button-group button:hover {
+    opacity: 1;
+}
