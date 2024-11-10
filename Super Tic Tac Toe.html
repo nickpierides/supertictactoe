@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Super Tic Tac Toe with Victory Screen</title>
+    <style>
+        body {
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+        }
+
+        #controls {
+            margin: 10px;
+        }
+
+        #restartButton {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            background-color: #ff6347;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #restartButton:hover {
+            background-color: #e5533d;
+        }
+
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        #game {
+            display: flex;
+            flex-wrap: wrap;
+            width: 612px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+        }
+
+        #testingBoard {
+            display: flex;
+            flex-wrap: wrap;
+            width: 200px;
+            margin-left: 20px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            background-color: #2d2d2d;
+            position: relative;
+        }
+
+        .board {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            width: 200px;
+            height: 200px;
+            border: 2px solid #333;
+            margin: -1px 0 0 -1px;
+            border-radius: 10px;
+            background-color: #2e2e2e;
+            overflow: hidden;
+            transition: background-color 0.5s;
+        }
+
+        /* Hover effect on active boards */
+        .board.active:hover {
+            box-shadow: 0 0 15px rgba(255, 99, 71, 0.8);
+            cursor: pointer;
+        }
+
+        .cell {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            border: 1px solid #444;
+            line-height: 64px;
+            font-size: 48px;
+            font-weight: 900;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            cursor: pointer;
+            margin: -1px 0 0 -1px;
+            text-align: center;
+            color: #f0f0f0;
+            transition: background-color 0.3s, transform 0.2s;
+            border-radius: 5px;
+            background-color: #3e3e3e;
+        }
+
+        .cell:hover {
+            background-color: #2f2f2f
+        }
+
+        .cell.disabled {
+            background-color: #3e3e3e;
+            cursor: not-allowed;
+        }
+
+        /* Darker X's and O's inside won boards */
+        .board.won .cell {
+            color: darkgray;
+        }
+
+        /* Dark gray background for won boards */
+        .board.won {
+            background-color: #0d0d0d;
+        }
+
+        .board.active {
+            border-color: #ff6347;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 198px;
+            height: 198px;
+            background-color: rgba(5, 5, 5, 0.2);
+            font-size: 160px;
+            font-weight: 900;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            line-height: 198px;
+            text-align: center;
+            color: #ff6347;
+            text-shadow: 0 0 10px rgba(255, 99, 71, 0.8);
+            pointer-events: none;
+            animation: smash 0.5s forwards;
+        }
+
+        @keyframes smash {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2) rotate(15deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        /* Animation for cell clicks */
+        .cell.played {
+            animation: pop 0.2s ease-out forwards;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.8);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Particle styles */
+        .enhanced-particle {
+            position: absolute;
+            background-color: #ff6347;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: enhancedParticleAnim 1.5s forwards;
+        }
+
+        @keyframes enhancedParticleAnim {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* Ghost symbol styles using ::after pseudo-element */
+        .cell.ghost::after {
+            content: attr(data-ghost);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            line-height: 64px;
+            font-size: 48px;
+            font-weight: 900;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            color: inherit;
+            opacity: 0;
+            animation: fadeIn .5s forwards;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 0.65
+            }
+        }
+
+        /* Adjusted ghost classes */
+        .cell.ghost-x {
+            color: #ff6347;
+        }
+
+        .cell.ghost-o {
+            color: #1e90ff;
+        }
+
+        /* Victory Screen Styles */
+        #victoryScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        #victoryScreen .message {
+            background-color: #2e2e2e;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            color: #f0f0f0;
+        }
+
+        #victoryScreen .message h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        #victoryScreen .message button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #ff6347;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #victoryScreen .message button:hover {
+            background-color: #e5533d;
+        }
+
+        /* Testing Board Styles */
+        #testingBoard .cell {
+            font-size: 32px;
+        }
+
+        #testingBoard .cell:hover {
+            background-color: #333
+        }
+
+        /* Testing board cell colors */
+        #testingBoard .cell.x {
+            color: #ff6347;
+        }
+
+        #testingBoard .cell.o {
+            color: #1e90ff;
+        }
+
+        /* Adjusted Options Popup Styles */
+        .options-popup {
+            position: absolute;
+            top: 100%; /* Position below testingBoard */
+            left: 0;
+            margin-top: 10px; /* Add some space */
+            background-color: #2e2e2e;
+            padding: 10px; /* Reduced padding */
+            border: 2px solid #444;
+            border-radius: 10px;
+            z-index: 1000;
+            text-align: center;
+            width: 200px;
+            display: flex; /* Use flex layout */
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .options-popup p {
+            font-weight: bold;
+            margin: 0 0 10px 0; /* Adjust margins */
+        }
+
+        .options-popup .button-group {
+            display: flex;
+            justify-content: center;
+        }
+
+        .options-popup .button-group button {
+            margin: 0 5px;
+            padding: 8px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .options-popup .button-group button:first-child {
+            margin-left: 0;
+        }
+
+        .options-popup .button-group button:last-child {
+            margin-right: 0;
+        }
+
+        /* Specific button styles */
+        .options-popup .x-button {
+            background-color: #ff6347;
+            color: #fff;
+        }
+
+        .options-popup .o-button {
+            background-color: #1e90ff;
+            color: #fff;
+        }
+
+        .options-popup .cancel-button {
+            background-color: #777;
+            color: #fff;
+        }
+
+        .options-popup .button-group button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>SUPER TIC TAC TOE</h1>
+    <div id="controls">
+        <button id="restartButton">RESTART GAME</button>
+    </div>
+    <div id="container">
+        <div id="game"></div>
+        <div id="testingBoard"></div>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victoryScreen">
+        <div class="message">
+            <h2 id="victoryMessage"></h2>
+            <button id="playAgainButton">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const game = document.getElementById('game');
+            const testingBoard = document.getElementById('testingBoard');
+
+            // Generate the 9 boards
+            for (let b = 0; b < 9; b++) {
+                let board = document.createElement('div');
+                board.classList.add('board');
+                board.dataset.board = b;
+                // Generate the 9 cells in each board
+                for (let c = 0; c < 9; c++) {
+                    let cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.cell = c;
+                    board.appendChild(cell);
+                }
+                game.appendChild(board);
+            }
+
+            // Generate the testing board
+            for (let c = 0; c < 9; c++) {
+                let cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.cell = c;
+                cell.addEventListener('click', handleTestingCellClick);
+                testingBoard.appendChild(cell);
+            }
+
+            // Game state variables
+            let currentPlayer = 'X';
+            let gameActive = true;
+            let boardStatus = Array(9).fill(null); // Stores 'X' or 'O' if board is won
+            let boards = Array(9).fill(null).map(() => Array(9).fill(null)); // 9 boards, each with 9 cells
+            let nextBoard = null; // The board index the next player must play in
+
+            // Click event handler
+            function handleCellClick(event) {
+                const cell = event.target;
+                const boardDiv = cell.parentElement;
+                const boardIndex = parseInt(boardDiv.dataset.board);
+                const cellIndex = parseInt(cell.dataset.cell);
+
+                if (
+                    !gameActive ||
+                    cell.textContent !== '' ||
+                    (nextBoard !== null && nextBoard !== boardIndex)
+                ) {
+                    return;
+                }
+
+                // Update cell
+                cell.textContent = currentPlayer;
+                cell.classList.add('played');
+                cell.classList.remove('ghost', 'ghost-x', 'ghost-o');
+                delete cell.dataset.ghost;
+                boards[boardIndex][cellIndex] = currentPlayer;
+
+                // Check if the small board is won
+                if (checkWin(boards[boardIndex], currentPlayer)) {
+                    boardStatus[boardIndex] = currentPlayer;
+                    boardDiv.classList.add('won');
+
+                    // Display the winner of the small board
+                    let overlay = document.createElement('div');
+                    overlay.classList.add('overlay');
+                    overlay.textContent = currentPlayer;
+
+                    // Set color based on player
+                    if (currentPlayer === 'X') {
+                        overlay.style.color = '#ff6347'; // Tomato color for 'X'
+                        overlay.style.textShadow = '0 0 10px rgba(255, 99, 71, 0.8)';
+                    } else {
+                        overlay.style.color = '#1e90ff'; // DodgerBlue color for 'O'
+                        overlay.style.textShadow = '0 0 10px rgba(30, 144, 255, 0.8)';
+                    }
+
+                    boardDiv.appendChild(overlay);
+
+                    // Create enhanced particles effect
+                    createEnhancedParticles(boardDiv, currentPlayer);
+                }
+
+                // Check if the game is won
+                if (checkWin(boardStatus, currentPlayer)) {
+                    gameActive = false;
+                    showVictoryScreen(currentPlayer);
+                    return;
+                }
+
+                // Update nextBoard
+                if (boardStatus[cellIndex] === null) {
+                    nextBoard = cellIndex;
+                } else {
+                    nextBoard = null; // Player can choose any board
+                }
+
+                updateActiveBoards();
+
+                // Switch player
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+
+            // Handle mouse enter for ghost symbol
+            function handleCellMouseEnter(event) {
+                const cell = event.target;
+                if (
+                    cell.textContent === '' &&
+                    !cell.classList.contains('disabled') &&
+                    gameActive
+                ) {
+                    cell.dataset.ghost = currentPlayer;
+                    cell.classList.add('ghost');
+                    if (currentPlayer === 'X') {
+                        cell.classList.add('ghost-x');
+                    } else {
+                        cell.classList.add('ghost-o');
+                    }
+                }
+            }
+
+            // Handle mouse leave to remove ghost symbol
+            function handleCellMouseLeave(event) {
+                const cell = event.target;
+                if (cell.classList.contains('ghost')) {
+                    delete cell.dataset.ghost;
+                    cell.classList.remove('ghost', 'ghost-x', 'ghost-o');
+                }
+            }
+
+            // Add event listeners to all cells
+            const cells = document.querySelectorAll('#game .cell');
+            cells.forEach((cell) => {
+                cell.addEventListener('click', handleCellClick);
+                cell.addEventListener('mouseenter', handleCellMouseEnter);
+                cell.addEventListener('mouseleave', handleCellMouseLeave);
+            });
+
+            // Function to update active boards
+            function updateActiveBoards() {
+                const boardsDivs = document.querySelectorAll('.board');
+                boardsDivs.forEach((boardDiv) => {
+                    const boardIndex = parseInt(boardDiv.dataset.board);
+                    if (boardStatus[boardIndex] !== null) {
+                        boardDiv.classList.remove('active');
+                        boardDiv
+                            .querySelectorAll('.cell')
+                            .forEach((cell) => cell.classList.add('disabled'));
+                    } else if (nextBoard === null || nextBoard === boardIndex) {
+                        boardDiv.classList.add('active');
+                        boardDiv.querySelectorAll('.cell').forEach((cell) => {
+                            if (cell.textContent === '') {
+                                cell.classList.remove('disabled');
+                            } else {
+                                cell.classList.add('disabled');
+                            }
+                        });
+                    } else {
+                        boardDiv.classList.remove('active');
+                        boardDiv
+                            .querySelectorAll('.cell')
+                            .forEach((cell) => cell.classList.add('disabled'));
+                    }
+                });
+            }
+
+            // Function to check for a win
+            function checkWin(board, player) {
+                const winConditions = [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8], // rows
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8], // columns
+                    [0, 4, 8],
+                    [2, 4, 6], // diagonals
+                ];
+                return winConditions.some((condition) => {
+                    return condition.every((index) => board[index] === player);
+                });
+            }
+
+            // Enhanced Particle Effect Function
+            function createEnhancedParticles(boardDiv, player) {
+                const numParticles = 100; // Increased number of particles
+                for (let i = 0; i < numParticles; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('enhanced-particle');
+
+                    // Random size between 5px and 15px
+                    const size = Math.random() * 10 + 5;
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+
+                    // Center the particles
+                    particle.style.left = '99px';
+                    particle.style.top = '99px';
+
+                    // Random trajectory
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = Math.random() * 150 + 50;
+                    const dx = Math.cos(angle) * distance + 'px';
+                    const dy = Math.sin(angle) * distance + 'px';
+                    particle.style.setProperty('--dx', dx);
+                    particle.style.setProperty('--dy', dy);
+
+                    // Set particle color based on player
+                    if (player === 'X') {
+                        particle.style.backgroundColor = '#ff6347'; // Tomato for 'X'
+                    } else {
+                        particle.style.backgroundColor = '#1e90ff'; // DodgerBlue for 'O'
+                    }
+
+                    boardDiv.appendChild(particle);
+
+                    // Remove particle after animation
+                    particle.addEventListener('animationend', () => {
+                        particle.remove();
+                    });
+                }
+            }
+
+            // Show Victory Screen
+            function showVictoryScreen(player) {
+                const victoryScreen = document.getElementById('victoryScreen');
+                const victoryMessage = document.getElementById('victoryMessage');
+                victoryMessage.textContent = 'Player ' + player + ' Wins!';
+                victoryScreen.style.display = 'flex';
+            }
+
+            // Restart Game Function
+            function restartGame() {
+                // Reset game state variables
+                currentPlayer = 'X';
+                gameActive = true;
+                boardStatus = Array(9).fill(null);
+                boards = Array(9).fill(null).map(() => Array(9).fill(null));
+                nextBoard = null;
+
+                // Clear all cells
+                const gameCells = document.querySelectorAll('#game .cell');
+                gameCells.forEach((cell) => {
+                    cell.textContent = '';
+                    cell.classList.remove('played', 'disabled', 'ghost', 'ghost-x', 'ghost-o');
+                    delete cell.dataset.ghost;
+                });
+
+                // Clear testing board
+                const testingCells = document.querySelectorAll('#testingBoard .cell');
+                testingCells.forEach((cell) => {
+                    cell.textContent = '';
+                    cell.classList.remove('x', 'o');
+                });
+
+                // Remove all overlays and reset board styles
+                const boardsDivs = document.querySelectorAll('.board');
+                boardsDivs.forEach((boardDiv) => {
+                    boardDiv.classList.remove('won');
+                    boardDiv.classList.remove('active');
+                    boardDiv.style.backgroundColor = ''; // Remove background color
+                    // Remove overlay
+                    const overlay = boardDiv.querySelector('.overlay');
+                    if (overlay) {
+                        overlay.remove();
+                    }
+                });
+
+                // Hide victory screen if visible
+                document.getElementById('victoryScreen').style.display = 'none';
+
+                // Initialize active boards
+                updateActiveBoards();
+            }
+
+            // Add event listener to restart button
+            document.getElementById('restartButton').addEventListener('click', restartGame);
+
+            // Add event listener to 'Play Again' button
+            document.getElementById('playAgainButton').addEventListener('click', () => {
+                restartGame();
+            });
+
+            // Handle testing board cell clicks
+            function handleTestingCellClick(event) {
+                const cell = event.target;
+                const cellIndex = parseInt(cell.dataset.cell);
+
+                // Remove existing popup if any
+                const existingPopup = testingBoard.querySelector('.options-popup');
+                if (existingPopup) {
+                    existingPopup.remove();
+                }
+
+                // Create options popup
+                const optionsPopup = document.createElement('div');
+                optionsPopup.classList.add('options-popup');
+
+                const message = document.createElement('p');
+                message.textContent = '';
+                optionsPopup.appendChild(message);
+
+                // Create button group container
+                const buttonGroup = document.createElement('div');
+                buttonGroup.classList.add('button-group');
+
+                const xButton = document.createElement('button');
+                xButton.textContent = 'X';
+                xButton.classList.add('x-button');
+                xButton.addEventListener('click', () => {
+                    cell.textContent = 'X';
+                    cell.classList.add('x'); // Add class for color
+                    setBoardWinner(cellIndex, 'X');
+                    optionsPopup.remove();
+                });
+                buttonGroup.appendChild(xButton);
+
+                const oButton = document.createElement('button');
+                oButton.textContent = 'O';
+                oButton.classList.add('o-button');
+                oButton.addEventListener('click', () => {
+                    cell.textContent = 'O';
+                    cell.classList.add('o'); // Add class for color
+                    setBoardWinner(cellIndex, 'O');
+                    optionsPopup.remove();
+                });
+                buttonGroup.appendChild(oButton);
+
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'CANCEL';
+                cancelButton.classList.add('cancel-button');
+                cancelButton.addEventListener('click', () => {
+                    optionsPopup.remove();
+                });
+                buttonGroup.appendChild(cancelButton);
+
+                optionsPopup.appendChild(buttonGroup);
+
+                // Append the popup to the testing board
+                testingBoard.appendChild(optionsPopup);
+            }
+
+            // Function to set the board winner for testing
+            function setBoardWinner(boardIndex, player) {
+                // Update board status
+                boardStatus[boardIndex] = player;
+
+                // Update the main game board
+                const boardDiv = document.querySelector(`.board[data-board='${boardIndex}']`);
+
+                // Clear existing overlay if any
+                const existingOverlay = boardDiv.querySelector('.overlay');
+                if (existingOverlay) {
+                    existingOverlay.remove();
+                }
+
+                boardDiv.classList.add('won');
+
+                // Display the winner of the small board
+                let overlay = document.createElement('div');
+                overlay.classList.add('overlay');
+                overlay.textContent = player;
+
+                // Set color based on player
+                if (player === 'X') {
+                    overlay.style.color = '#ff6347'; // Tomato color for 'X'
+                    overlay.style.textShadow = '0 0 10px rgba(255, 99, 71, 0.8)';
+                } else {
+                    overlay.style.color = '#1e90ff'; // DodgerBlue color for 'O'
+                    overlay.style.textShadow = '0 0 10px rgba(30, 144, 255, 0.8)';
+                }
+
+                boardDiv.appendChild(overlay);
+
+                // Create enhanced particles effect
+                createEnhancedParticles(boardDiv, player);
+
+                // Check if the game is won
+                if (checkWin(boardStatus, player)) {
+                    gameActive = false;
+                    showVictoryScreen(player);
+                    return;
+                }
+
+                updateActiveBoards();
+            }
+
+            // Initialize active boards
+            updateActiveBoards();
+        })();
+    </script>
+</body>
+</html>
